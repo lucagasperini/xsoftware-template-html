@@ -5,7 +5,7 @@ Description: Standard HTML interface for XSoftware Plugin on wordpress.
 Version: 1.0
 Author: Luca Gasperini
 Author URI: https://xsoftware.it/
-Text Domain: xsoftware_template_html
+Text Domain: xs_tmp
 */
 
 if(!defined("ABSPATH")) die;
@@ -38,7 +38,14 @@ class xs_template_html_plugin
                 add_filter('xs_product_single_html', [ $this, 'single_html' ], 0, 2);
                 /* Use @xs_framework_menu_items to print cart menu item */
                 add_filter('xs_framework_menu_items', [ $this, 'cart_menu_item' ], 2);
+                add_action( 'plugins_loaded', [ $this, 'l10n_load' ] );
         }
+
+        function l10n_load()
+        {
+                load_plugin_textdomain('xs_tmp', false, basename( dirname( __FILE__ ) ).'/l10n/');
+        }
+
         /*
         *  array : cart_menu_item : array
         *  This method is used to create the menu items
@@ -64,7 +71,8 @@ class xs_template_html_plugin
 
                 /* Add a child menu item for shopping cart */
                 $items[] = xs_framework::insert_nav_menu_item([
-                        'title' => '<i class="fas fa-shopping-cart"></i><span>Cart</span>',
+                        'title' => '<i class="fas fa-shopping-cart"></i>
+                                <span>'.__('Cart','xs_tmp').'</span>',
                         'url' => $this->checkout,
                         'order' => 101,
                         'parent' => $top->ID
@@ -72,21 +80,25 @@ class xs_template_html_plugin
 
                 /* If user is logged print Logout item, else Login item*/
                 if(is_user_logged_in()) {
+
                         $items[] = xs_framework::insert_nav_menu_item([
-                                'title' => '<i class="fas fa-file-invoice"></i>Invoices</span>',
+                                'title' => '<i class="fas fa-file-invoice"></i>
+                                        <span>'.__('Invoices','xs_tmp').'</span>',
                                 'url' => $this->checkout.'?invoice',
                                 'order' => 102,
                                 'parent' => $top->ID
                         ]);
                         $items[] = xs_framework::insert_nav_menu_item([
-                                'title' => '<i class="fas fa-sign-out-alt"></i>Logout</span>',
+                                'title' => '<i class="fas fa-sign-out-alt"></i>
+                                        <span>'.__('Logout','xs_tmp').'</span>',
                                 'url' => wp_logout_url( home_url() ),
                                 'order' => 103,
                                 'parent' => $top->ID
                         ]);
                 } else {
                         $items[] = xs_framework::insert_nav_menu_item([
-                                'title' => '<i class="fas fa-sign-in-alt"></i><span>Login</span>',
+                                'title' => '<i class="fas fa-sign-in-alt"></i>
+                                        <span>'.__('Login','xs_tmp').'</span>',
                                 'url' => wp_login_url( home_url() ),
                                 'order' => 102,
                                 'parent' => $top->ID
@@ -117,10 +129,10 @@ class xs_template_html_plugin
                 $btn = xs_framework::create_button([
                         'name' => 'add_cart',
                         'value' => $post_id,
-                        'text' => 'Add to Cart'
+                        'text' => __('Add to Cart','xs_tmp')
                 ]);
                 /* Create a number input as quantity of this item */
-                $qt_label = '<span>Quantity:</span>';
+                $qt_label = '<span>'.__('Quantity','xs_tmp').':</span>';
                 $qt = xs_framework::create_input_number([
                         'name' => 'qt',
                         'value' => 1,
@@ -168,7 +180,7 @@ class xs_template_html_plugin
                 echo '</div>';
                 if(!empty($price)) {
                         echo '<div class="cart">';
-                        echo '<span>Price:</span>';
+                        echo '<span>'.__('Price','xs_tmp').':</span>';
                         echo '<i>'.$price['price'].' '.$price['currency_symbol'].'</i>';
                         echo apply_filters('xs_cart_add_html', $id);
                         echo '</div>';
@@ -204,7 +216,7 @@ class xs_template_html_plugin
                         $output .= '</div>';
                         if(!empty($price)) {
                                 $output .= '<div class="price">';
-                                $output .= '<p>Price:</p>';
+                                $output .= '<p>'.__('Price','xs_tmp').':</p>';
                                 $output .= '<i>'.$price['price'].
                                 ' '.$price['currency_symbol'].'</i>';
                                 $output .= '</div>';
@@ -243,7 +255,8 @@ class xs_template_html_plugin
                         $tmp[] = $item['discount'];
                         $tmp[] = $item['tax_code'];
                         $tmp[] = $item['subtotal'] . ' ' . $symbol;
-                        $tmp[] = '<a href="?rem_cart='.$item['id'].'">Remove</a>';
+                        $tmp[] = '<a href="?rem_cart='.$item['id'].'">'.
+                                __('Remove','xs_tmp').'</a>';
 
                         $display_items[] = $tmp;
                 }
@@ -252,23 +265,23 @@ class xs_template_html_plugin
                         'class' => 'items',
                         'data' => $display_items,
                         'headers' => [
-                                'Description',
-                                'Quantity',
-                                'Price',
-                                'Discount (%)',
-                                'VAT',
-                                'Subtotal',
-                                'Actions'
+                                __('Description','xs_tmp'),
+                                __('Quantity','xs_tmp'),
+                                __('Price','xs_tmp'),
+                                __('Discount (%)','xs_tmp'),
+                                __('VAT','xs_tmp'),
+                                __('Subtotal','xs_tmp'),
+                                __('Actions','xs_tmp')
                         ],
                         'echo' => FALSE
                 ]);
 
                 /* Get the global property from sale order */
-                $t['subtotal'][0] = '<strong>Subtotal:</strong>';
+                $t['subtotal'][0] = '<strong>'.__('Subtotal','xs_tmp').':</strong>';
                 $t['subtotal'][1] = $so['transaction']['subtotal'] . ' ' . $symbol;
-                $t['taxed'][0] = '<strong>VAT:</strong>';
+                $t['taxed'][0] = '<strong>'.__('VAT','xs_tmp').':</strong>';
                 $t['taxed'][1] = $so['transaction']['tax'] . ' ' . $symbol;
-                $t['total'][0] = '<strong>Total:</strong>';
+                $t['total'][0] = '<strong>'.__('Total','xs_tmp').':</strong>';
                 $t['total'][1] = $so['transaction']['total'] . ' ' . $symbol;
                 /* Get the table */
                 $output .= xs_framework::create_table([
@@ -280,13 +293,13 @@ class xs_template_html_plugin
                 /* Get the form for discount code */
                 $output .= '<form action="" method="GET">';
                 /* Print discount code label and text input */
-                $label = '<span>Discount Code:</span>';
+                $label = '<span>'.__('Discount Code','xs_tmp').':</span>';
                 $discount = xs_framework::create_input([
                         'name' => 'discount'
                 ]);
                 /* Print the button */
                 $button = xs_framework::create_button([
-                        'text' => 'Apply Discount'
+                        'text' => __('Apply discount','xs_tmp')
                 ]);
                 /* Print the container */
                 $output .= xs_framework::create_container([
@@ -312,7 +325,7 @@ class xs_template_html_plugin
                 );
                 /* Print the HTML */
                 $output = '';
-                $output .= '<h2>The cart is empty!</h2>';
+                $output .= '<h2>'.__('The cart is empty!','xs_tmp').'</h2>';
                 /* Return the HTML */
                 return $output;
         }
@@ -330,7 +343,7 @@ class xs_template_html_plugin
 
                 /* Print the HTML */
                 $output = '';
-                $output .= '<h2>The payment was successful!</h2>';
+                $output .= '<h2>'.__('The payment was successful!','xs_tmp').'</h2>';
                 /* Print the invoice pdf on a frame */
                 $output .= '<iframe src="data:application/pdf;base64,'.$info['pdf']['base64'].'"
                         class="xs_cart_pdf_frame"></iframe>';
@@ -353,7 +366,7 @@ class xs_template_html_plugin
                         $tmp[] = $i['transaction']['total'] . ' ' . $symbol;
                         $tmp[] = xs_framework::create_link([
                                 'href' => $this->checkout.'?invoice='.$i['invoice']['id'],
-                                'text' => 'Open',
+                                'text' => __('Open','xs_tmp'),
                                 'echo' => FALSE
                         ]);
 
@@ -365,12 +378,12 @@ class xs_template_html_plugin
                         'class' => 'invoice_list',
                         'data' => $display,
                         'headers' => [
-                                'ID',
-                                'Name',
-                                'Date',
-                                'Accountholder',
-                                'Amount',
-                                'Actions',
+                                __('ID','xs_tmp'),
+                                __('Name','xs_tmp'),
+                                __('Date','xs_tmp'),
+                                __('Accountholder','xs_tmp'),
+                                __('Amount','xs_tmp'),
+                                __('Actions','xs_tmp'),
                         ],
                         'echo' => FALSE
                 ]);
@@ -381,9 +394,11 @@ class xs_template_html_plugin
         {
                 if(!is_array($info)) {
                         if($info === 0)
-                                return '<h1>The selected invoice does not exist!</h1>';
+                                return '<h1>'.__(
+                                        'The selected invoice does not exist!','xs_tmp').'</h1>';
                         if($info === 1)
-                                return '<h1>You do not have permission to log in here!</h1>';
+                                return '<h1>'.__('You do not have permission to log in here!',
+                                        'xs_tmp').'</h1>';
                 }
                 /* Print the HTML */
                 $output = '';
