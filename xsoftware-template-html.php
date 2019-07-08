@@ -166,27 +166,31 @@ class xs_template_html_plugin
                         'xs_product_template',
                         plugins_url('style/single.min.css', __FILE__)
                 );
+
+                $output = '';
                 $image = get_the_post_thumbnail_url( $id, 'medium' );
                 $title = get_the_title($id);
                 $price = apply_filters('xs_cart_item_price', $id);
 
-                echo '<div class="product_item">';
-                echo '<div class="product_content">';
-                echo '<img src="'.$image.'"/>';
-                echo '<div class="info">';
-                echo '<h1>'.$title.'</h1>';
-                echo '<p class="descr">'.$single['descr'].'</p>';
-                echo '<p class="text">'.$single['text'].'</p>';
-                echo '</div>';
+                $output .= '<div class="product_item">';
+                $output .= '<div class="product_content">';
+                $output .= '<img src="'.$image.'"/>';
+                $output .= '<div class="info">';
+                $output .= '<h1>'.$title.'</h1>';
+                $output .= '<p class="descr">'.$single['descr'].'</p>';
+                $output .= '<p class="text">'.$single['text'].'</p>';
+                $output .= '</div>';
                 if(!empty($price)) {
-                        echo '<div class="cart">';
-                        echo '<span>'.__('Price','xs_tmp').':</span>';
-                        echo '<i>'.$price['price'].' '.$price['currency_symbol'].'</i>';
-                        echo apply_filters('xs_cart_add_html', $id);
-                        echo '</div>';
+                        $output .= '<div class="cart">';
+                        $output .= '<span>'.__('Price','xs_tmp').':</span>';
+                        $output .= '<i>'.$price['price'].' '.$price['currency_symbol'].'</i>';
+                        $output .= apply_filters('xs_cart_add_html', $id);
+                        $output .= '</div>';
                 }
-                echo '</div>';
-                echo '</div>';
+                $output .= '</div>';
+                $output .= '</div>';
+
+                return $output;
         }
 
         function archive_html($archive, $user_lang)
