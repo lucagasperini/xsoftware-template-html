@@ -201,13 +201,14 @@ class xs_template_html_plugin
                         plugins_url('style/archive.min.css', __FILE__)
                 );
                 $output .= '<div class="products_table">';
-                foreach($archive as $single) {
-                        $image = get_the_post_thumbnail_url( $single, 'medium' );
-                        $title = get_the_title($single);
-                        $link = get_the_permalink($single);
-                        $price = apply_filters('xs_cart_item_price', $single->ID);
+
+                foreach($archive as $id) {
+                        $image = get_the_post_thumbnail_url( $id, 'medium' );
+                        $title = get_the_title($id);
+                        $link = get_the_permalink($id);
+                        $price = apply_filters('xs_cart_item_price', $id);
                         $descr = get_post_meta(
-                                $single->ID,
+                                $id,
                                 'xs_products_descr_'.$user_lang,
                                 true
                         );
