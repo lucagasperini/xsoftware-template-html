@@ -103,3 +103,58 @@ msgstr "Intestatario"
 #. Amount
 msgid "Amount"
 msgstr "Totale"
+
+msgid ""
+"This site uses technical and third-party cookies, to improve the experience of navigation, to use them press the "
+"\"Accept\" button. For more information you can consult our"
+msgstr ""
+"Questo sito utilizza cookie tecnici and terze parti, per migliorare l’esperienza di navigazione, per utilizzarli "
+"premi sul pulsante \"Accetta\". Per ulteriori informazioni puoi consultare la nostra"
+
+msgid "Privacy Policy"
+msgstr "Informativa sulla Privacy"
+
+msgid "Accept"
+msgstr "Accetto"
+
+msgid "By Product"
+msgstr "Per Prodotto"
+
+msgid "By Status"
+msgstr "Per Stato"
+
+msgid "By Importance"
+msgstr "Per Importanza"
+
+msgid "Search"
+msgstr "Cerca"
+
+msgid "Show"
+msgstr "Mostra"
+
+msgid "Product"
+msgstr "Prodotto"
+
+msgid "Title"
+msgstr "Titolo"
+
+msgid "Status"
+msgstr "Stato"
+
+msgid "Assignee"
+msgstr "Assegnato"
+
+msgid "Reported By"
+msgstr "Riportato da"
+
+msgid "Importance"
+msgstr "Importanza"
+
+msgid "Reported on"
+msgstr "Riportato il"
+
+msgid "Last edit on"
+msgstr "Ultima modifica il"
+
+msgid "Bug"
+msgstr "Bug"

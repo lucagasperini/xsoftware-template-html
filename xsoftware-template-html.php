@@ -39,11 +39,61 @@ class xs_template_html_plugin
                 /* Use @xs_framework_menu_items to print cart menu item */
                 add_filter('xs_framework_menu_items', [ $this, 'cart_menu_item' ], 2);
                 add_action( 'plugins_loaded', [ $this, 'l10n_load' ] );
+                add_filter('xs_socials_facebook_post', [$this, 'show_socials_posts']);
+                add_filter('xs_socials_instagram_post', [$this, 'show_socials_posts']);
+                add_filter('xs_socials_twitter_post', [$this, 'show_socials_posts']);
+                add_filter('xs_framework_privacy_show', [$this, 'show_privacy_banner']);
+                add_filter('xs_bugtracking_searchbox_show', [$this, 'bugtracking_searchbox_show']);
+                add_filter('xs_bugtracking_archive_show', [$this, 'bugtracking_archive_show']);
+                add_filter('xs_bugtracking_single_show', [$this, 'bugtracking_single_show']);
+                add_filter('xs_documentation_archive_show', [$this, 'documentation_archive_show']);
+                add_filter('xs_documentation_single_show', [$this, 'documentation_single_show']);
+                add_filter('xs_socials_icons_show', [$this, 'show_socials_icons']);
         }
 
         function l10n_load()
         {
                 load_plugin_textdomain('xs_tmp', false, basename( dirname( __FILE__ ) ).'/l10n/');
+        }
+
+        function show_privacy_banner()
+        {
+                /* Add the css */
+                wp_enqueue_style(
+                        'xs_privacy_banner_style',
+                        plugins_url('style/privacy.min.css',__FILE__)
+                );
+                $url = get_privacy_policy_url();
+                $message = __('This site uses technical and third-party cookies, to improve the experience of '.
+                'navigation, to use them press the "Accept" button. For more information you can consult our','xs_tmp').
+                '<a href="'.$url.'"> '.__('Privacy Policy','xs_tmp').'</a>.';
+
+                return '<div class="xs_privacy_message">
+                <p>'.$message.'</p>
+                <button onclick="xs_privacy_accept();">'.__('Accept','xs_tmp').'</button>
+                </div>';
+        }
+
+        function show_socials_icons()
+        {
+                /* Add the css */
+                wp_enqueue_style(
+                        'xs_socials_icons_style',
+                        plugins_url('style/socials-icons.min.css',__FILE__)
+                );
+
+                /* Initialize string HTML variable */
+                $output = '';
+
+                $output .= '<div class="xs_socials_icons">';
+                $output .= '<a href="mailto:info@xsoftware.it"><i class="fas fa-envelope-square"></i></a>';
+                $output .= '<a href="https://www.facebook.com/xsoftware.it"><i class="fab fa-facebook-square"></i></a>';
+                $output .= '<a href="https://www.instagram.com/xsoftware.it"><i class="fab fa-instagram"></i></a>';
+                $output .= '<a href="https://twitter.com/xsoftware_"><i class="fab fa-twitter-square"></i></a>';
+                $output .= '<a href="https://gitlab.com/xsoftware"><i class="fab fa-gitlab"></i></a>';
+                $output .= '</div>';
+
+                return $output;
         }
 
         /*
@@ -178,7 +228,6 @@ class xs_template_html_plugin
                 $output .= '<div class="info">';
                 $output .= '<h1>'.$title.'</h1>';
                 $output .= '<p class="descr">'.$single['descr'].'</p>';
-                $output .= '<p class="text">'.$single['text'].'</p>';
                 $output .= '</div>';
                 if(!empty($price)) {
                         $output .= '<div class="cart">';
@@ -414,6 +463,264 @@ class xs_template_html_plugin
                 return $output;
         }
 
+        function show_socials_posts($post)
+        {
+                /* Add the css style */
+                wp_enqueue_style(
+                        'xs_socials_facebook_style',
+                        plugins_url('style/socials.min.css', __FILE__)
+                );
+
+                /* Print the HTML */
+                $output = '';
+
+                if(empty($post['description']) && empty($post['media']))
+                        return '';
+
+                $output .= '<div class="xs_socials_post">';
+
+                $output .= '<div class="info">';
+                $output .= '<a href="'.$post['user_link'].'">';
+                $output .= '<div class="user">';
+                $output .= '<img src="'.$post['user_image'].'">';
+                $output .= '<span>'.$post['user_name'].'</span>';
+                $output .= '</div>';
+                $output .= '</a>';
+                $output .= '<span class="date">'.$post['date']->format('d/m/Y').'</span>';
+                $output .= '</div>';
+                $output .= '<a href="'.$post['permalink'].'">';
+                $output .= '<div class="post">';
+                if(!empty($post['description']))
+                        $output .= '<span class="description">'.$post['description'].'</span>';
+                if(!empty($post['media']) && is_array($post['media']))
+                        $output .= '<img src="'.$post['media'][0].'">';
+                else if(!empty($post['media']))
+                        $output .= '<img src="'.$post['media'].'">';
+                $output .= '</div>';
+                $output .= '</a>';
+
+                $output .= '</div>';
+
+                return $output;
+        }
+
+        function bugtracking_searchbox_show($search)
+        {
+                /* Create the html form */
+                echo '<form method="get">';
+
+                xs_framework::create_select([
+                        'class' => 'xs_full_width',
+                        'name' => 'pro',
+                        'data'=> $search['product'],
+                        'default' => __('By Product','xs_tmp'),
+                        'echo' => TRUE
+                ]);
+
+                xs_framework::create_select([
+                        'class' => 'xs_full_width',
+                        'name' => 'st',
+                        'data'=> $search['status'],
+                        'default' => __('By Status','xs_tmp'),
+                        'echo' => TRUE
+                ]);
+
+                xs_framework::create_select([
+                        'class' => 'xs_full_width',
+                        'name' => 'i',
+                        'data'=> $search['importance'],
+                        'default' => __('By Importance','xs_tmp'),
+                        'echo' => TRUE
+                ]);
+
+                xs_framework::create_button([
+                        'text' => __('Search','xs_tmp').'..',
+                        'echo' => TRUE
+                ]);
+
+                /* Close the html form */
+                echo "</form>";
+
+                /* Get all variable from the $_GET variable, is empty string if is not present */
+                $output['product'] = isset($_GET['pro']) ? intval($_GET['pro']) : '';
+                $output['status'] = isset($_GET['st']) ? intval($_GET['st']) : '';
+                $output['importance'] = isset($_GET['i']) ? intval($_GET['i']) : '';
+
+                return $output;
+        }
+
+        function bugtracking_archive_show($search)
+        {
+                $data = array();
+                $users = xs_framework::get_user_display_name();
+
+                /* Loop all post found in the query */
+                foreach($search['post_id'] as $id) {
+                        /* Get the metadata from the post */
+                        $meta = get_post_custom( $id );
+
+                        /* Get the metadata specific informations from the post */
+                        $current['product'] = isset($meta['xs_bugtracking_product'][0]) ?
+                                intval($meta['xs_bugtracking_product'][0]) :
+                                '';
+                        $current['status'] = isset($meta['xs_bugtracking_status'][0]) ?
+                                intval($meta['xs_bugtracking_status'][0]) :
+                                '';
+                        $current['assignee'] = isset($meta['xs_bugtracking_assignee'][0]) ?
+                                intval($meta['xs_bugtracking_assignee'][0]) :
+                                '';
+                        $current['importance'] = isset($meta['xs_bugtracking_importance'][0]) ?
+                                intval($meta['xs_bugtracking_importance'][0]) :
+                                '';
+
+                        /* Create a link in the actions column */
+                        $data[$id][] = xs_framework::create_link([
+                                'href' => get_permalink($id),
+                                'text' => __('Show','xs_tmp')
+                        ]);
+
+                        /* Define all property columns */
+                        $data[$id][] = $id;
+                        $data[$id][] = $search['product'][$current['product']];
+                        $data[$id][] = get_the_title($id);
+                        $data[$id][] = $search['status'][$current['status']];
+                        $data[$id][] = $users[$current['assignee']];
+                        $data[$id][] = $users[get_post_field( 'post_author', $id )];
+                        $data[$id][] = $search['importance'][$current['importance']];
+                        $data[$id][] = get_the_date('',$id);
+                        $data[$id][] = get_the_modified_date('',$id);
+                }
+                $fields = array();
+
+                /* Define all columns header */
+                $fields[] = __('Actions','xs_tmp');
+                $fields[] = __('ID','xs_tmp');
+                $fields[] = __('Product','xs_tmp');
+                $fields[] = __('Title','xs_tmp');
+                $fields[] = __('Status','xs_tmp');
+                $fields[] = __('Assignee','xs_tmp');
+                $fields[] = __('Reported By','xs_tmp');
+                $fields[] = __('Importance','xs_tmp');
+                $fields[] = __('Reported on','xs_tmp');
+                $fields[] = __('Last edit on','xs_tmp');
+
+                /* Create the table */
+                return xs_framework::create_table([
+                        'headers' => $fields,
+                        'data' => $data,
+                        'echo' => FALSE
+                ]);
+
+        }
+
+        function bugtracking_single_show($search)
+        {
+                $users = xs_framework::get_user_display_name();
+                /* Get the post class from the post id */
+                $post = get_post($search['post_id']);
+                /* Get the metadata from the post id */
+                $meta = get_post_custom($search['post_id']);
+
+                /* Get the metadata specific informations from the post */
+                $product = isset($meta['xs_bugtracking_product'][0]) ? intval($meta['xs_bugtracking_product'][0]) : '';
+                $status = isset($meta['xs_bugtracking_status'][0]) ? intval($meta['xs_bugtracking_status'][0]) : '';
+                $assignee = isset($meta['xs_bugtracking_assignee'][0]) ?
+                        intval($meta['xs_bugtracking_assignee'][0]) :
+                        '';
+                $importance = isset($meta['xs_bugtracking_importance'][0]) ?
+                        intval($meta['xs_bugtracking_importance'][0]) :
+                        '';
+
+                $data['product'][0] = __('Product','xs_tmp').':';
+                $data['product'][1] = $search['product'][$product];
+                $data['status'][0] = __('Status','xs_tmp').':';
+                $data['status'][1] = $search['status'][$status];
+                $data['importance'][0] = __('Importance','xs_tmp').':';
+                $data['importance'][1] = $search['importance'][$importance];
+                $data['assignee'][0] = __('Assignee','xs_tmp').':';
+                $data['assignee'][1] = $users[$assignee];
+                $data['reported_by'][0] = __('Reported By','xs_tmp').':';
+                $data['reported_by'][1] = $users[$post->post_author];
+                $data['create_date'][0] = __('Reported on','xs_tmp').':';
+                $data['create_date'][1] = $post->post_date_gmt;
+                $data['modify_date'][0] = __('Last edit on','xs_tmp').':';
+                $data['modify_date'][1] = $post->post_modified_gmt;
+
+                /* Print the title of the bug with it's id */
+                echo '<h1>'.__('Bug','xs_tmp').' '.$search['post_id'].': '.get_the_title($search['post_id']).'</h1>';
+
+                /* Print the bug property as table */
+                xs_framework::create_table([
+                        'data' => $data
+                ]);
+
+                /* Print the text of the bug */
+                echo '<p class="xs_text">'.$post->post_content.'</p>';
+        }
+
+        function documentation_archive_show($info)
+        {
+                /* Add the css style */
+                wp_enqueue_style(
+                        'xs_documentation_style',
+                        plugins_url('style/documentation.min.css', __FILE__)
+                );
+                $output = '';
+                /* Print the matrix */
+                foreach($info['post'] as $cat_id => $docs) {
+                        /* Get the current category */
+                        $current = $info['categories'][$cat_id];
+                        /* Print the treeview */
+                        $output .= '<ul class="css-treeview">';
+                        /* Print the category image */
+                        $output .= xs_framework::create_image([
+                                'src' => $current['img'],
+                                'alt' => $current['name'],
+                                'height' => 150,
+                                'width' => 150
+                        ]);
+                        /* Print the title of the category */
+                        $output .=  '<label>'.$current['name'].'</label>';
+                        /* Print the description of the category */
+                        $output .=  '<p>'.$current['descr'].'</p>';
+                        /* Print the sub array of documentations */
+                        foreach($docs as $id) {
+                                /* Print the row */
+                                $output .=  '<li><div class="row">';
+                                /* Print the link on title*/
+                                $output .=  '<a href="'.get_permalink($id).'">'.get_the_title($id).'</a>';
+                                /* Print the download link */
+                                $output .=  '<a class="download-link" href="'.get_permalink($id).'?download">';
+                                /* Print the font-awesome icon for download */
+                                $output .=  '<i class="fas fa-file-download"></i>';
+                                /* Close download link */
+                                $output .=  '</a>';
+                                /* Close the row */
+                                $output .=  '</div></li>';
+                        }
+                        /* Close the treeview */
+                        $output .=  '</ul>';
+                }
+
+                return $output;
+        }
+
+        function documentation_single_show($id)
+        {
+                /* Add the css style */
+                wp_enqueue_style(
+                        'xs_documentation_style',
+                        plugins_url('style/documentation.min.css', __FILE__)
+                );
+                $output = '';
+                /* Print the title of the documentation */
+                $output .= '<h1>'.get_the_title($id).'</h1>';
+
+                /* Print the parsed HTML of the documentation*/
+                $output .= get_post_meta($id, 'xs_documentation_html', true);
+
+                return $output;
+        }
 }
 
 endif;
