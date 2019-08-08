@@ -723,8 +723,8 @@ class xs_template_html_plugin
         }
 }
 
-endif;
-
 $xs_template_html_plugin = new xs_template_html_plugin();
+
+endif;
 
 ?>
